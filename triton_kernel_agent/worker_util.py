@@ -161,14 +161,12 @@ def _run_test_process(test_file: Path, workdir: Path, result_queue: mp.Queue) ->
         if str(workdir) not in sys.path:
             sys.path.insert(0, str(workdir))
 
-        with open(test_file) as f:
-            code = f.read()
+        # Execute the generated test file via runpy: same __main__ semantics
+        # as the previous exec(), but the code source stays a file on disk
+        # that can be audited, and no dynamically-built string is evaluated.
+        import runpy
 
-        exec_globals = {
-            "__name__": "__main__",
-            "__file__": str(test_file),
-        }
-        exec(code, exec_globals)
+        runpy.run_path(str(test_file), run_name="__main__")
 
         # Template enforces testsfiles to call sys.exit(0)
         # This should NOT be reached

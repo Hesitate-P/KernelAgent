@@ -1,0 +1,831 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260927T032317455Z-33895-67baaa0c5c7d",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "baseline-read",
+      "target": "utils/providers/sjtu_provider.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "triton_kernel_agent/platform/ascend_c.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "triton_kernel_agent/platform/ascend_c_components.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/naive_ascend_c_diff.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/naive_ascend_c_loop.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/run_ascend_c_search.py",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "baseline-read",
+      "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+      "reason": "baseline_snapshot_unreadable: file is missing from task baseline"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/available_models.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/deepseek_provider.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/env_config.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/openai_base.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/sjtu_provider.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_worker.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/platform/ascend_c.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/platform/ascend_c_components.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/platform/registry.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/naive_ascend_c_diff.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/naive_ascend_c_loop.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/run_ascend_c_search.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": true,
+      "captured_files": 153,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 0,
+      "compensated_target_count": 7
+    },
+    "change_tracking": {
+      "touched_observed": 0,
+      "touched_retained": 0,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 16,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 16,
+      "selected_files": 16,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 16,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 16,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "baseline_snapshot_unreadable": 9,
+      "scanner_failed": 16,
+      "project_check_failed": 25
+    },
+    "reasons": [
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "utils/providers/sjtu_provider.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "triton_kernel_agent/platform/ascend_c.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "triton_kernel_agent/platform/ascend_c_components.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/naive_ascend_c_diff.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/naive_ascend_c_loop.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/run_ascend_c_search.py",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "baseline_snapshot_unreadable",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+        "detail": "file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/available_models.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/deepseek_provider.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/env_config.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/openai_base.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/sjtu_provider.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend_c.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend_c_components.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/registry.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/naive_ascend_c_diff.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/naive_ascend_c_loop.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/run_ascend_c_search.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "utils/providers/sjtu_provider.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "triton_kernel_agent/platform/ascend_c.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "triton_kernel_agent/platform/ascend_c_components.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/naive_ascend_c_diff.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/naive_ascend_c_loop.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/run_ascend_c_search.py",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline-read",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+        "detail": "baseline_snapshot_unreadable: file is missing from task baseline",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/available_models.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/deepseek_provider.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/env_config.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/openai_base.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/sjtu_provider.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend_c.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend_c_components.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/registry.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/naive_ascend_c_diff.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/naive_ascend_c_loop.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/run_ascend_c_search.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-27T03:23:17.455Z",
+  "session_id": "sess_72eb6273-2c50-4e37-89bc-f380af5a578f",
+  "target": ".",
+  "revision": "e0647170da36ef9b059ac0bd3d60103aa4ed378b",
+  "rules_version": "unavailable",
+  "diff_hash": "8dd073202e09df82ec400d25143942b592638a10ffcddeefcab907eb4f7fba50",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 16,
+    "changed_files": [
+      {
+        "file": "examples/naive_ascend_c_diff.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 534
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "3f95ddad14b5dce1c0891fe11ee577eb9c696a6960759fbd43ef3a01c1df40f6"
+      },
+      {
+        "file": "examples/naive_ascend_c_loop.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 344
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "4cafa227ca0226001367e549ed16cc7a45b21c5ef44e107eceb4a72ea1134eb4"
+      },
+      {
+        "file": "examples/run_ascend_c_search.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 426
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "70bc335e9f407218a71bff68e59f009d9b60875bb84fe6734f876c5715a69aaf"
+      },
+      {
+        "file": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 293
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "02ff68f1d805534fe5e21ee229948e8ff78922220ab3d3bdf36de3f009f5a147"
+      },
+      {
+        "file": "examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 15
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "44c852d6c82330d76e4df237c3bac74be1a1f65e295ad99c2e75d7e7c0b4eee6"
+      },
+      {
+        "file": "examples/seeds/ascend_c_rsm/solution/runner/main.cpp",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 25
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "6b9c4803a5b27d949f6a1bf2d2c671c78831e14803d76b5e00433758f620d420"
+      },
+      {
+        "file": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "ranges": [
+          {
+            "start": 501,
+            "end": 505
+          },
+          {
+            "start": 956,
+            "end": 956
+          },
+          {
+            "start": 961,
+            "end": 966
+          },
+          {
+            "start": 971,
+            "end": 982
+          },
+          {
+            "start": 988,
+            "end": 988
+          }
+        ],
+        "before_hash": "3c871e39cb82806b3de8247673693d449953c925638f59c13a5386908392e521",
+        "after_hash": "a987b84f33224d9afd8905d704fcc2c5ee2f38c9e1457e644501cbdcb7d2ce53"
+      },
+      {
+        "file": "triton_kernel_agent/opt_worker.py",
+        "ranges": [
+          {
+            "start": 257,
+            "end": 260
+          },
+          {
+            "start": 279,
+            "end": 291
+          },
+          {
+            "start": 293,
+            "end": 301
+          },
+          {
+            "start": 336,
+            "end": 340
+          },
+          {
+            "start": 343,
+            "end": 353
+          }
+        ],
+        "before_hash": "c22a22b78f786374f4d46ed5abe8c7aed9c62bc672743ac2ac4da11381f92669",
+        "after_hash": "6dade402ca5dc17bc6ef868b4c5a6c6bf331e6f964163b3730095cbc10617035"
+      },
+      {
+        "file": "triton_kernel_agent/platform/ascend_c_components.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1088
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "59de20b2b68ae5048da22799d766fbba720be8bebb1c700475041c8b88576b56"
+      },
+      {
+        "file": "triton_kernel_agent/platform/ascend_c.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 1528
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "8e3414019afe7f8f43ddee6e6ba8f57c26d8c19a4b6a89ceb293e00b00f05114"
+      },
+      {
+        "file": "triton_kernel_agent/platform/registry.py",
+        "ranges": [
+          {
+            "start": 284,
+            "end": 291
+          }
+        ],
+        "before_hash": "88e75e99ee1ee881beee638000965c2c81a1aa192cf1c0e67e5b5c5afcb58504",
+        "after_hash": "9579c4b8a1fc020572eb4272a88fcb511a763f5cedaec6268bfee0032bad8ef3"
+      },
+      {
+        "file": "utils/providers/available_models.py",
+        "ranges": [
+          {
+            "start": 22,
+            "end": 22
+          },
+          {
+            "start": 32,
+            "end": 34
+          },
+          {
+            "start": 36,
+            "end": 36
+          },
+          {
+            "start": 38,
+            "end": 43
+          },
+          {
+            "start": 47,
+            "end": 58
+          }
+        ],
+        "before_hash": "6db3f86db4b238ad488d1271ee6798697ee0b0ced93c8387013450c90c67a803",
+        "after_hash": "573c227ee36329ca52fff8106a227da9cbcbaf66c46df1d921d2eff594eb4a47"
+      },
+      {
+        "file": "utils/providers/deepseek_provider.py",
+        "ranges": [
+          {
+            "start": 42,
+            "end": 46
+          }
+        ],
+        "before_hash": "ebb6b379e7661e9d5f32c6b1f399f635d6021347352f896fd82f209158d78346",
+        "after_hash": "ff275871c12ee6856e831154c1c352acedc69f7d001b3a43e0ad6d56069970b5"
+      },
+      {
+        "file": "utils/providers/env_config.py",
+        "ranges": [
+          {
+            "start": 18,
+            "end": 18
+          },
+          {
+            "start": 21,
+            "end": 87
+          }
+        ],
+        "before_hash": "b5245478ff7a179a9adbe849b1b79dbe5891e4ec06fd28764de320e2bbbb3a32",
+        "after_hash": "6b8627d7b0912fb9c491639acc3314ac7a76c7a2fe5e5ab6a4590090e71895ae"
+      },
+      {
+        "file": "utils/providers/openai_base.py",
+        "ranges": [
+          {
+            "start": 20,
+            "end": 24
+          },
+          {
+            "start": 51,
+            "end": 54
+          },
+          {
+            "start": 64,
+            "end": 84
+          }
+        ],
+        "before_hash": "8b0391b4d18318d6cb5168a7641447941569aba03c0eaaf14fd5fe01acda7c26",
+        "after_hash": "3f762db0a94d9afa552f784d0095b4482fddcb9eb886ddd3295e8841d7e3ec5d"
+      },
+      {
+        "file": "utils/providers/sjtu_provider.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 56
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "713d2ba214af0dfc48ef2c347ca68b698eef243721dc776835557ef97105c6e0"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-27T03:23:15.234Z",
+    "completed_at": "2026-09-27T03:23:17.455Z",
+    "duration_ms": 2221,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2221,
+    "peakMemoryBytes": 114966528,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f-20260927T032317455Z-33895-67baaa0c5c7d.json",
+    "latest_report": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f.json",
+    "history_summary": ".mimosa/history/run-20260927T032317455Z-33895-67baaa0c5c7d.json"
+  }
+}

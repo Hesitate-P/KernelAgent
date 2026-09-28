@@ -18,6 +18,7 @@ import argparse
 import json
 import math
 import os
+import pathlib
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 
@@ -264,9 +265,10 @@ def main() -> None:
         return
 
     out_path = os.path.abspath(args.out)
+    if os.path.basename(out_path) in ("", ".", ".."):
+        raise ValueError(f"refusing to write to unsafe path: {args.out!r}")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    with open(out_path, "w") as f:
-        f.write(text)
+    pathlib.Path(out_path).write_text(text)
 
 
 if __name__ == "__main__":

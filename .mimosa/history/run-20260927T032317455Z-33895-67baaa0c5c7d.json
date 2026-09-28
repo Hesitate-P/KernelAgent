@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260927T032317455Z-33895-67baaa0c5c7d",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline-read:utils/providers/sjtu_provider.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:triton_kernel_agent/platform/ascend_c.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:triton_kernel_agent/platform/ascend_c_components.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/naive_ascend_c_diff.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/naive_ascend_c_loop.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/run_ascend_c_search.py: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/seeds/ascend_c_rsm/solution/runner/main.cpp: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp: baseline_snapshot_unreadable: file is missing from task baseline",
+    "baseline-read:examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h: baseline_snapshot_unreadable: file is missing from task baseline",
+    "scan:utils/providers/available_models.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:utils/providers/deepseek_provider.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:utils/providers/env_config.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:utils/providers/openai_base.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:utils/providers/sjtu_provider.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_worker.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/platform/ascend_c.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/platform/ascend_c_components.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/platform/registry.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/naive_ascend_c_diff.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/naive_ascend_c_loop.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/run_ascend_c_search.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/seeds/ascend_c_rsm/solution/runner/main.cpp: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution.cpp: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:examples/seeds/ascend_c_rsm/solution/op_kernel/rsm_solution_core.h: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "e0647170da36ef9b059ac0bd3d60103aa4ed378b",
+  "diffHash": "8dd073202e09df82ec400d25143942b592638a10ffcddeefcab907eb4f7fba50",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-27T03:23:17.455Z",
+  "timing": {
+    "startedAt": "2026-09-27T03:23:15.234Z",
+    "completedAt": "2026-09-27T03:23:17.455Z",
+    "durationMs": 2221
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_snapshot_unreadable": 9,
+      "scanner_failed": 16,
+      "project_check_failed": 25
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f-20260927T032317455Z-33895-67baaa0c5c7d.json"
+}

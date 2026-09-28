@@ -21,6 +21,8 @@ from pathlib import Path
 from typing import Any
 from datetime import datetime
 import logging
+
+from triton_kernel_agent.safe_io import safe_join
 from dotenv import load_dotenv
 
 from .manager import WorkerManager
@@ -512,11 +514,9 @@ def kernel_function(*args, **kwargs):
         session_dir = self.log_dir / f"session_{timestamp}"
         session_dir.mkdir(exist_ok=True)
 
-        with open(session_dir / "problem.txt", "w") as f:
-            f.write(problem_description)
+        Path(safe_join(session_dir, "problem.txt")).write_text(problem_description)
         for i, test_code in enumerate(test_code_list):
-            with open(session_dir / f"test_{i}.py", "w") as f:
-                f.write(test_code)
+            Path(safe_join(session_dir, f"test_{i}.py")).write_text(test_code)
 
         # Generate kernel seeds (all tests as LLM context, with labels)
         kernel_seeds = self._generate_kernel_seeds(
@@ -525,8 +525,7 @@ def kernel_function(*args, **kwargs):
 
         # Save seeds
         for i, kernel in enumerate(kernel_seeds):
-            with open(session_dir / f"seed_{i}.py", "w") as f:
-                f.write(kernel)
+            Path(safe_join(session_dir, f"seed_{i}.py")).write_text(kernel)
 
         # Run parallel verification with session directory for worker logs
         result = self.manager.run_verification(
@@ -541,12 +540,12 @@ def kernel_function(*args, **kwargs):
             self.logger.info(f"Success! Worker {result['worker_id']} found solution")
 
             # Save successful kernel
-            with open(session_dir / "final_kernel.py", "w") as f:
-                f.write(result["kernel_code"])
+            Path(safe_join(session_dir, "final_kernel.py")).write_text(result["kernel_code"])
 
             # Save full result
-            with open(session_dir / "result.json", "w") as f:
-                json.dump(result, f, indent=2)
+            Path(safe_join(session_dir, "result.json")).write_text(
+                json.dumps(result, indent=2)
+            )
 
             return {
                 "success": True,

@@ -20,7 +20,8 @@ Process safety: Only manager process should write; workers return results via qu
 
 import fcntl
 import json
-import random
+import os
+import secrets
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -42,7 +43,11 @@ class JSONProgramDatabase(ProgramDatabase):
         Args:
             path: Path to the JSON file for storage
         """
-        self.path = Path(path)
+        from triton_kernel_agent.safe_io import safe_join
+
+        base = Path(path).parent
+        name = Path(path).name
+        self.path = safe_join(base, name)
         self.programs: dict[str, ProgramEntry] = {}
 
         if self.path.exists():
@@ -94,7 +99,7 @@ class JSONProgramDatabase(ProgramDatabase):
         programs_sorted = sorted(programs, key=lambda x: x.metrics.time_ms)
         top_half = programs_sorted[: n // 2 + 1]
         remaining = [p for p in programs if p not in top_half]
-        random_half = random.sample(remaining, min(n - len(top_half), len(remaining)))
+        random_half = random.SystemRandom().sample(remaining, min(n - len(top_half), len(remaining)))
 
         result = top_half[: n // 2] + random_half
         return result[:n]
@@ -106,15 +111,22 @@ class JSONProgramDatabase(ProgramDatabase):
         return len(self.programs)
 
     def save(self) -> None:
-        """Save to JSON with file locking."""
+        """Save to JSON with file locking (lock kept on a dedicated lockfile)."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
 
         data = {"programs": [self._entry_to_dict(p) for p in self.programs.values()]}
 
-        with open(self.path, "w") as f:
-            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-            json.dump(data, f, indent=2, default=str)
-            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        lock_fd = os.open(
+            os.path.join(str(self.path.parent), os.path.basename(str(self.path)) + ".lock"),
+            os.O_CREAT | os.O_WRONLY,
+            0o644,
+        )
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+            self.path.write_text(json.dumps(data, indent=2, default=str))
+        finally:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            os.close(lock_fd)
 
     def load(self) -> None:
         """Load from JSON."""

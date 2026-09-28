@@ -61,12 +61,14 @@ def _run_candidate_process(
         os.dup2(f_out.fileno(), 1)
         os.dup2(f_err.fileno(), 2)
 
-        # Explicitly execute sitecustomization (network blocking) if configured
+        # Explicitly execute sitecustomization (network blocking) if configured.
+        # runpy executes the file with __main__ semantics without eval'ing a
+        # dynamically-built string, keeping the code source auditable on disk.
         sitecustomize_path = run_dir / "sitecustomize.py"
         if sitecustomize_path.exists():
-            with open(sitecustomize_path, "r") as f:
-                sc_code = compile(f.read(), str(sitecustomize_path), "exec")
-                exec(sc_code, {})
+            import runpy
+
+            runpy.run_path(str(sitecustomize_path), run_name="__main__")
 
         # Find the script in argv and take everything from there
         if argv and exec_filename in argv:
@@ -77,16 +79,9 @@ def _run_candidate_process(
 
         # Set up sys.path to allow imports from the script's directory
         sys.path.insert(0, str(run_dir))
-        with open(exec_filename, "r") as f:
-            code = compile(f.read(), exec_filename, "exec")
-            exec(
-                code,
-                {
-                    "__name__": "__main__",
-                    "__file__": str(run_dir / exec_filename),
-                    "__package__": None,
-                },
-            )
+        import runpy
+
+        runpy.run_path(str(run_dir / exec_filename), run_name="__main__")
 
 
 def _run_candidate_multiprocess(

@@ -91,6 +91,17 @@ def _allowlist_env() -> dict[str, str]:
                 allow["PYTHONPATH"] = os.pathsep.join(keep)
         elif k.startswith("LANG") or k.startswith("LC_"):
             allow[k] = v
+        elif (
+            k.startswith("ASCEND_")
+            or k.startswith("HCCL_")
+            or k.startswith("CANN_")
+            or k.startswith("TOOLKIT_")
+        ):
+            # Ascend NPU (CANN) runtime environment
+            allow[k] = v
+        elif k == "LD_LIBRARY_PATH":
+            # CANN/torch_npu rely on shared library paths
+            allow[k] = v
     # Determinism and small resource caps
     allow["PYTHONHASHSEED"] = "0"
     allow.setdefault("OMP_NUM_THREADS", "1")
@@ -214,7 +225,7 @@ def run_candidate(
     """
     run_dir = (
         run_root
-        / f"attempt_{int(time.time() * 1000)}_{os.getpid()}_{random.randint(0, 9999):04d}"
+        / f"attempt_{int(time.time() * 1000)}_{os.getpid()}_{random.SystemRandom().randint(0, 9999):04d}"
     )
     run_dir.mkdir(parents=True, exist_ok=False)
 

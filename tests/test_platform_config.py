@@ -151,7 +151,7 @@ class TestPlatformRegistry:
         for name in get_platform_choices():
             config = get_platform(name)
             assert config.name == name
-            assert config.device_string in ["cuda", "xpu"]
+            assert config.device_string in ["cuda", "xpu", "npu"]
 
 
 class TestEdgeCases:

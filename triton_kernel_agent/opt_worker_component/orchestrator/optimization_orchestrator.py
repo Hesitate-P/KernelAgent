@@ -31,6 +31,7 @@ from triton_kernel_agent.prompt_manager import PromptManager
 from triton_kernel_agent.worker import VerificationWorker
 from triton_kernel_agent.worker_util import _write_kernel_file
 from utils.providers.base import BaseProvider
+from triton_kernel_agent.safe_io import safe_join
 
 
 def extract_triton_config(kernel_code: str) -> dict[str, Any]:
@@ -482,9 +483,8 @@ class OptimizationOrchestrator:
             )
 
             # Save prompt
-            prompt_file = self.artifact_dir / f"round{round_num:03d}_opt_prompt.txt"
-            with open(prompt_file, "w") as f:
-                f.write(opt_prompt)
+            prompt_file = safe_join(self.artifact_dir, f"round{round_num:03d}_opt_prompt.txt")
+            prompt_file.write_text(opt_prompt)
 
             # Generate optimized kernel
             optimized_kernel = self._generate_optimized_kernel(opt_prompt, round_num)
@@ -498,6 +498,11 @@ class OptimizationOrchestrator:
                 test_code,
                 problem_description,
                 round_num,
+                # Platforms whose kernel is more than one file (a source bundle)
+                # need to know what the LLM's edit is *relative to*, because the
+                # model only re-emits the files it changed.  Passed through to
+                # verifiers that accept it; Triton verifiers ignore it.
+                parent_kernel=current_kernel,
             )
             if not success:
                 error_feedback = (
@@ -512,7 +517,7 @@ class OptimizationOrchestrator:
             error_feedback = ""
 
             # Save and benchmark
-            kernel_file_round = self.artifact_dir / f"kernel_round_{round_num}.py"
+            kernel_file_round = safe_join(self.artifact_dir, f"kernel_round_{round_num}.py")
             kernel_file_round.write_text(optimized_kernel)
 
             bench_results = self.benchmarker.benchmark_kernel(
@@ -639,7 +644,7 @@ class OptimizationOrchestrator:
 
         # Profile the final best kernel to get its roofline
         if best_round_num > 0:
-            final_kernel_file = self.artifact_dir / f"kernel_round_{best_round_num}.py"
+            final_kernel_file = safe_join(self.artifact_dir, f"kernel_round_{best_round_num}.py")
             if final_kernel_file.exists():
                 self.logger.info(
                     f"Profiling final best kernel (round {best_round_num})..."
@@ -703,11 +708,11 @@ class OptimizationOrchestrator:
             baseline_results = {"time_ms": known_kernel_time, "speedup": 1.0}
             self.logger.info(f"📊 Using known kernel time: {best_time:.4f} ms")
             # Still need to profile for SOL
-            kernel_file_round = self.artifact_dir / "kernel_round_0.py"
+            kernel_file_round = safe_join(self.artifact_dir, "kernel_round_0.py")
             kernel_file_round.write_text(kernel_code)
         else:
             _write_kernel_file(self.kernel_file, kernel_code, self.logger)
-            kernel_file_round = self.artifact_dir / "kernel_round_0.py"
+            kernel_file_round = safe_join(self.artifact_dir, "kernel_round_0.py")
             kernel_file_round.write_text(kernel_code)
 
             baseline_results = self.benchmarker.benchmark_kernel(
@@ -773,13 +778,13 @@ class OptimizationOrchestrator:
                 f"[{round_num}] Using cached baseline NCU profile (skipping NCU)"
             )
             # Still write the kernel file so downstream artifact paths are stable.
-            kernel_file_round = self.artifact_dir / f"kernel_round_{round_num - 1}.py"
+            kernel_file_round = safe_join(self.artifact_dir, f"kernel_round_{round_num - 1}.py")
             kernel_file_round.write_text(current_kernel)
             ncu_metrics = cached["ncu_metrics"]
             self._pending_baseline_metrics = None  # consume once
         else:
             self.logger.info(f"[{round_num}] Profiling current kernel with NCU...")
-            kernel_file_round = self.artifact_dir / f"kernel_round_{round_num - 1}.py"
+            kernel_file_round = safe_join(self.artifact_dir, f"kernel_round_{round_num - 1}.py")
             kernel_file_round.write_text(current_kernel)
 
             profiler_results = self.profiler.profile_kernel(
@@ -787,13 +792,23 @@ class OptimizationOrchestrator:
             )
 
             if profiler_results is None:
-                self.logger.warning(f"[{round_num}] Profiling failed")
-                return None, None, None
+                self.logger.warning(
+                    f"[{round_num}] Profiling unavailable (e.g. no NCU on this "
+                    "platform) - falling back to timing-only feedback with "
+                    "LLM source-level analysis"
+                )
+                ncu_metrics = {}
+            else:
+                ncu_metrics = profiler_results.metrics
 
-            ncu_metrics = profiler_results.metrics
-
-            if not ncu_metrics:
-                return None, None, ncu_metrics
+            if not ncu_metrics and profiler_results is not None:
+                # Profiler ran but produced no metrics: keep going with an
+                # empty metrics dict so the LLM can still analyze the source.
+                self.logger.warning(
+                    f"[{round_num}] Profiler returned empty metrics; "
+                    "continuing with source-level analysis"
+                )
+                ncu_metrics = {}
 
         # Run roofline analysis
         flat_metrics = next(iter(ncu_metrics.values()), {}) if ncu_metrics else {}
@@ -843,9 +858,10 @@ class OptimizationOrchestrator:
             )
 
         if bottleneck_results:
-            strategy_file = self.artifact_dir / f"round{round_num:03d}_strategy.json"
-            with open(strategy_file, "w") as f:
-                json.dump([r.to_dict() for r in bottleneck_results], f, indent=2)
+            strategy_file = safe_join(self.artifact_dir, f"round{round_num:03d}_strategy.json")
+            strategy_file.write_text(
+                json.dumps([r.to_dict() for r in bottleneck_results], indent=2)
+            )
             return bottleneck_results, roofline_result, ncu_metrics
 
         return None, roofline_result, ncu_metrics
@@ -871,7 +887,7 @@ class OptimizationOrchestrator:
         """
         try:
             # Write kernel to temp file for profiling
-            kernel_file = self.artifact_dir / f"kernel_round_{round_num}_sol.py"
+            kernel_file = safe_join(self.artifact_dir, f"kernel_round_{round_num}_sol.py")
             kernel_file.write_text(kernel_code)
 
             profiler_results = self.profiler.profile_kernel(
@@ -911,9 +927,8 @@ class OptimizationOrchestrator:
             )
 
             # Save response
-            response_file = self.artifact_dir / f"round{round_num:03d}_opt_reply.txt"
-            with open(response_file, "w") as f:
-                f.write(response_text)
+            response_file = safe_join(self.artifact_dir, f"round{round_num:03d}_opt_reply.txt")
+            response_file.write_text(response_text)
 
             # Extract code
             optimized_kernel = self.verification_worker._extract_code_from_response(
@@ -938,19 +953,39 @@ class OptimizationOrchestrator:
         test_code: list[str],
         problem_description: str,
         round_num: int,
+        parent_kernel: str | None = None,
     ) -> tuple[bool, str, str]:
         """
         Verify kernel correctness with refinement attempts.
+
+        Args:
+            parent_kernel: The kernel this candidate was derived from.  Only
+                used by verifiers whose kernel spans several files and whose
+                model replies may therefore be partial (see the platform
+                ``ascend_c`` plugin); ignored otherwise.
 
         Returns:
             Tuple of (success, final_kernel, error_feedback)
         """
         self.logger.info(f"[{round_num}] Verifying correctness...")
+        import inspect
+
+        kwargs: dict[str, Any] = {}
+        try:
+            parameters = inspect.signature(
+                self.verification_worker.verify_with_refinement
+            ).parameters
+            if "parent_kernel" in parameters:
+                kwargs["parent_kernel"] = parent_kernel
+        except (TypeError, ValueError):  # pragma: no cover - builtins etc.
+            pass
+
         success, final_kernel, error_feedback = (
             self.verification_worker.verify_with_refinement(
                 kernel_code=optimized_kernel,
                 test_code=test_code,
                 problem_description=problem_description,
+                **kwargs,
             )
         )
 
@@ -1005,11 +1040,10 @@ class OptimizationOrchestrator:
             response_text = response.content
 
             # Save reflexion response
-            reflexion_file = (
-                self.artifact_dir / f"round{attempt.round_num:03d}_reflexion.txt"
+            reflexion_file = safe_join(
+                self.artifact_dir, f"round{attempt.round_num:03d}_reflexion.txt"
             )
-            with open(reflexion_file, "w") as f:
-                f.write(response_text)
+            reflexion_file.write_text(response_text)
 
             # Parse JSON from response
             reflexion_data = self._parse_reflexion_response(response_text, attempt)

@@ -15,10 +15,41 @@
 
 """End-to-end BF16 matmul+sigmoid test harness."""
 
+import os
 import sys
 import time
 from dotenv import load_dotenv
 from triton_kernel_agent import TritonKernelAgent
+
+
+def _safe_write_path(name):
+    """Reject anything that is not a plain filename in the current directory."""
+    if os.path.basename(str(name)) != str(name) or str(name) in ("", ".", ".."):
+        raise ValueError(f"refusing unsafe output path: {name!r}")
+    return str(name)
+
+
+def _safe_read_path(base, name):
+    """Confine reads to ``base``/``name`` (blocks traversal)."""
+    root = os.path.abspath(str(base))
+    full = os.path.abspath(os.path.join(root, str(name)))
+    if not full.startswith(root + os.sep):
+        raise ValueError(f"refusing unsafe read path: {name!r}")
+    return full
+
+
+def _write_text(path, data):
+    """Write text to an already-validated path."""
+    from pathlib import Path
+
+    Path(path).write_text(data, encoding="utf-8")
+
+
+def _read_text(path):
+    """Read text from an already-validated path."""
+    from pathlib import Path
+
+    return Path(path).read_text(encoding="utf-8")
 
 
 def main():
@@ -91,9 +122,8 @@ def get_init_inputs():
         print("=" * 80)
 
         # Save the kernel to a file for future use
-        kernel_file = "bf16_matmul_sigmoid_kernel.py"
-        with open(kernel_file, "w") as f:
-            f.write(result["kernel_code"])
+        kernel_file = _safe_write_path("bf16_matmul_sigmoid_kernel.py")
+        _write_text(kernel_file, result["kernel_code"])
         print(f"\n✓ Kernel saved to: {kernel_file}")
 
         # Run the generated test to show performance
@@ -102,9 +132,8 @@ def get_init_inputs():
         # Read the generated test code
         import os
 
-        test_file = os.path.join(result["session_dir"], "test.py")
-        with open(test_file, "r") as f:
-            test_code = f.read()
+        test_file = _safe_read_path(result["session_dir"], "test.py")
+        test_code = _read_text(test_file)
 
         print("\nGenerated Test Code:")
         print("=" * 80)
@@ -113,13 +142,11 @@ def get_init_inputs():
 
         # Create a test script that uses the generated kernel
         # First, copy the kernel to kernel.py so the test can import it
-        with open("kernel.py", "w") as f:
-            f.write(result["kernel_code"])
+        _write_text(_safe_write_path("kernel.py"), result["kernel_code"])
 
         final_test_script = test_code
 
-        with open("final_test.py", "w") as f:
-            f.write(final_test_script)
+        _write_text(_safe_write_path("final_test.py"), final_test_script)
 
         os.system("python final_test.py")
 

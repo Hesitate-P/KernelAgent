@@ -33,6 +33,7 @@ from utils.providers import get_model_provider
 
 from .prompt_manager import PromptManager
 from .worker_util import _run_test_multiprocess
+from triton_kernel_agent.safe_io import safe_join
 
 
 DISALLOWED_TORCH_PATTERNS = [
@@ -188,7 +189,7 @@ class VerificationWorker:
 
     def _setup_logging(self):
         """Setup worker-specific logging."""
-        log_file = self.log_dir / f"worker_{self.worker_id}.log"
+        log_file = safe_join(self.log_dir, f"worker_{self.worker_id}.log")
         self.logger = logging.getLogger(f"worker_{self.worker_id}")
         self.logger.setLevel(logging.INFO)
 
@@ -482,9 +483,8 @@ class VerificationWorker:
         }
 
         # Save to log file
-        round_log_file = self.log_dir / f"round_{round_num}.json"
-        with open(round_log_file, "w") as f:
-            json.dump(round_data, f, indent=2)
+        round_log_file = safe_join(self.log_dir, f"round_{round_num}.json")
+        round_log_file.write_text(json.dumps(round_data, indent=2))
 
         # Add to history
         self.history.append(round_data)

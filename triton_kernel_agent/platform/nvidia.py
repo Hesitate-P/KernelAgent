@@ -49,9 +49,10 @@ from triton_kernel_agent.platform.interfaces import (
 class NvidiaVerifier(KernelVerifier):
     """Verifies kernel correctness using ``VerificationWorker`` on CUDA."""
 
-    def __init__(self, log_dir: Path, logger: logging.Logger) -> None:
+    def __init__(self, log_dir: Path, logger: logging.Logger, target_platform: str = "cuda") -> None:
         self.log_dir = log_dir
         self.logger = logger
+        self.target_platform = target_platform
 
     def verify(
         self,
@@ -70,6 +71,7 @@ class NvidiaVerifier(KernelVerifier):
             worker_id=-1,
             workdir=verify_dir,
             log_dir=verify_dir,
+            target_platform=self.target_platform,
         )
 
         success, _, error = worker.verify_with_refinement(
@@ -104,17 +106,20 @@ class NvidiaBenchmarker(KernelBenchmarker):
         benchmark_lock: Any,
         warmup: int = 25,
         repeat: int = 100,
+        target_platform: str = "cuda",
     ) -> None:
         self.log_dir = log_dir
         self.logger = logger
         self.benchmark_lock = benchmark_lock
         self.warmup = warmup
         self.repeat = repeat
+        self.target_platform = target_platform
 
     def _get_benchmarker(self):
         from triton_kernel_agent.opt_worker_component.benchmarking.benchmark import (
             Benchmark,
         )
+        from triton_kernel_agent.platform_config import get_platform
 
         artifacts_dir = self.log_dir / "artifacts"
         artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -125,6 +130,7 @@ class NvidiaBenchmarker(KernelBenchmarker):
             worker_id=-1,
             warmup=self.warmup,
             repeat=self.repeat,
+            device=get_platform(self.target_platform).device_string,
         )
 
     def benchmark_kernel(
@@ -371,13 +377,23 @@ def _nvidia_worker_process(
     # Pin this worker process to a single GPU before any torch import or
     # GPU-touching subprocess.  Both the benchmark subprocess and NCU
     # subprocess inherit the env, so they automatically run on this GPU.
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
-    # Print to harness log immediately so multi-GPU pinning is verifiable.
-    print(
-        f"[worker {worker_id}] pinned to GPU {gpu_id} "
-        f"(CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']})",
-        flush=True,
-    )
+    target_platform = str(worker_kwargs.get("target_platform", "cuda") or "cuda")
+    if target_platform == "npu":
+        # Ascend NPU device visibility (torch_npu / CANN runtime)
+        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = str(gpu_id)
+        print(
+            f"[worker {worker_id}] pinned to NPU {gpu_id} "
+            f"(ASCEND_RT_VISIBLE_DEVICES={os.environ['ASCEND_RT_VISIBLE_DEVICES']})",
+            flush=True,
+        )
+    else:
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+        # Print to harness log immediately so multi-GPU pinning is verifiable.
+        print(
+            f"[worker {worker_id}] pinned to GPU {gpu_id} "
+            f"(CUDA_VISIBLE_DEVICES={os.environ['CUDA_VISIBLE_DEVICES']})",
+            flush=True,
+        )
 
     import sys
 

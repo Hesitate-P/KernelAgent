@@ -251,5 +251,43 @@ def _register_builtins() -> None:
     for component, factory in _noop.items():
         registry.register(component, "noop", factory)
 
+    # Ascend NPU (torch_npu + triton-ascend): reuses the nvidia orchestration
+    # with an "npu" target platform and a timing-only profiling fallback.
+    from triton_kernel_agent.platform.ascend import (
+        AscendAcceleratorSpecsProvider,
+        AscendBenchmarker,
+        AscendKernelProfiler,
+        AscendRooflineAnalyzer,
+        AscendVerifier,
+        AscendWorkerRunner,
+    )
+    from triton_kernel_agent.platform.nvidia import (
+        NvidiaBottleneckAnalyzer,
+        NvidiaRAGPrescriber,
+    )
+
+    _ascend = {
+        # Manager-level
+        "verifier": AscendVerifier,
+        "benchmarker": AscendBenchmarker,
+        "worker_runner": AscendWorkerRunner,
+        # Worker-level
+        "specs_provider": AscendAcceleratorSpecsProvider,
+        "profiler": AscendKernelProfiler,
+        "roofline_analyzer": AscendRooflineAnalyzer,
+        "bottleneck_analyzer": NvidiaBottleneckAnalyzer,
+        "rag_prescriber": NvidiaRAGPrescriber,
+    }
+    for component, factory in _ascend.items():
+        registry.register(component, "ascend", factory)
+
+    # Ascend C (hand-written C++ kernels driven through the official contest
+    # harness).  Same orchestration skeleton, but the "kernel" is a multi-file
+    # source bundle, verification/measurement run the official build+test+bench
+    # pipeline, and the profiling feedback is the measured per-case table.
+    from triton_kernel_agent.platform.ascend_c_components import register as _register_ascend_c
+
+    _register_ascend_c(registry)
+
 
 _register_builtins()

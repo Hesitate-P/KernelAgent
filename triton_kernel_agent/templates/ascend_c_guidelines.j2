@@ -1,0 +1,179 @@
+{#
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+## ASCEND C PROGRAMMING MODEL — REFERENCE (CANN 8.5, Ascend 910B3)
+
+Everything below is the API surface available in this build. Do not invent
+symbols: if you are not sure an API exists, keep the existing code path.
+
+### Execution model
+- One kernel `__global__ __aicore__ void f(GM_ADDR ...)`. It runs on `block_dim`
+  AI Cores; each core gets `AscendC::GetBlockIdx()` in `[0, GetBlockNum())` and
+  `AscendC::GetBlockNum()` (== `block_dim`).
+- There is **no cross-core shared state** other than global memory (`GM_ADDR`)
+  and the `workspace` pointer. `AscendC::SyncAll()` only synchronises the cores
+  of one kernel invocation (no data exchange).
+- Intra-kernel inter-core signalling: `AscendC::CrossCoreSetFlag<...>(mode, id)`
+  / `AscendC::CrossCoreWaitFlag(id)` plus a `SyncAll()`; or atomics via
+  `AscendC::SetAtomicAdd<float>()` / `SetAtomicNone()`. **Float atomics are
+  non-deterministic** — the correctness gate compares against an FP64 oracle
+  element-wise, so prefer a deterministic two-phase split instead.
+- Queue/tile memory: `AscendC::TPipe pipe;` then
+  `pipe.InitBuffer(buffer, bytes)` where the buffer is a
+  `AscendC::TBuf<AscendC::TPosition::VECCALC>` (calculate buffer, UB) — this is
+  the pattern the current code uses; keep using `TBuf`/`Get<T>()`.
+  Total UB (`kScoreTile*4` etc.) must stay under ~192 KB per core.
+
+### Data movement
+- `AscendC::GlobalTensor<T> t; t.SetGlobalBuffer(ptr, count);`
+- `AscendC::DataCopyPad(dstLocal, srcGlobal[offset], {1, bytes, 0, 0}, {})` —
+  the 4-element `DataCopyExtParams{blockCount, blockLen, srcStride, dstStride}`
+  form works for **arbitrary byte counts** (no 32B alignment requirement on the
+  length, unlike `DataCopy`). This is what the current code uses for rows whose
+  byte length is not 32B-aligned.
+- `AscendC::DataCopy(dst, src, count)` — needs 32B-aligned block counts.
+- Synchronisation between DMA and vector pipes:
+  `AscendC::PipeBarrier<PIPE_ALL>()` (correct but coarse) or the finer
+  `SetFlag/WaitFlag<PIPE_MTE2, PIPE_V>` combinations. Excess `PIPE_ALL`
+  barriers are the usual hidden cost; they serialise MTE2 (DMA) against the
+  vector unit.
+
+### Vector intrinsics (element-wise, operate on `LocalTensor<T>`)
+`Cast(dst, src, RoundMode::CAST_NONE, n)` (half->float or float->half),
+`Add/Sub/Mul/Div`, `Adds/Muls` (broadcast scalar), `Exp`, `Ln`, `Sqrt`,
+`Rsqrt`, `Maxs/Mins`, `Duplicate(dst, value, n)`, `Abs`, `Reciprocal`.
+Reductions: `ReduceMax(dst, src, work, n, calIndex=false)`,
+`ReduceSum(dst, src, work, n)`, `ReduceMean`, `WholeReduceSum`, plus
+`AscendC::GetReduceMaxMinCount()` for the index. The `work` buffer must be as
+large as the source tile. Reductions write the result to element 0 of `dst` and
+are **not** free — `n` up to 64 elements per instruction on this arch, so large
+reductions are internally serialised; reduce over fp32 tiles, not fp16.
+
+**Type discipline — this is where most generated kernels die.** The 4-argument
+(Level-2) overloads are SFINAE-constrained on the *exact* primitive type:
+
+```
+template <typename T, typename U, enable_if<is_same<PrimT<T>, U>>>
+Muls(dst, src, const U& scalar, int32_t count);          // 4 args: scalar must be EXACTLY T
+Div (dst, src0, const LocalTensor<T>& src1, int32_t count); // 4 args: src1 must be a TENSOR
+```
+- For `LocalTensor<float>` the scalar must be a `float`. `Muls(sum, sum, 1.0 / z, d)` with a
+  `double` literal **fails to compile** ("requires 6 arguments, but 4 were provided"), because
+  the SFINAE overload drops out and only the masked 6-argument form remains.
+  Always write `1.0f` / `0.0f` / `static_cast<float>(x)`, or keep the scalar in a `float` variable.
+- `Div`'s 4-argument form takes a *tensor* as the divisor. To divide by a scalar, either
+  `Muls(dst, src, 1.0f / scalar, n)` (compute the reciprocal once, on the host or in a scalar)
+  or `Reciprocal(tmp, scalar_tensor, n)` followed by `Mul`.
+- Never mix `half` and `float` tensors in one intrinsic call, and never pass a `half` scalar
+  to a float Muls: `Cast` first, then do all arithmetic in fp32.
+- `Duplicate(dst, scalar, n)` also needs the scalar to be exactly `T` (`0.0f` for float).
+
+- `LocalTensor::GetValue(i)` / `SetValue(i, v)` are **scalar** accesses that
+  stall the vector pipe. Do not call them inside a hot per-row loop if you can
+  keep the value in a register or accumulate with `Muls`/`Adds` instead.
+- FP16 arithmetic on the vector unit is 1/2 rate of FP32 in some generations;
+  converting once (`Cast`) and staying in fp32 is usually right here.
+- `Exp`/`Ln`/`Rsqrt` are much slower than `Mul` (multi-instruction polynomial
+  sequences, and the floor of `Exp` on this chip is NOT correctly rounded for
+  every input — the precision fixtures target exactly that). Compute `Exp`
+  exactly once per element, and if you must choose between two mathematically
+  equivalent formulations, prefer the one with fewer transcendentals.
+- `ReduceMax`/`ReduceSum` write element 0 of `dst` and require a `work` buffer
+  at least as long as the source; both `dst` and `work` must be fp32.
+- A method you call must exist in the same class body, and every member you use
+  must be declared in the class body. If you write a new helper, declare it.
+
+### Host / launch side
+- The host sets `block_dim` and fills the tiling struct; the runner then calls
+  `ACLRT_LAUNCH_KERNEL(rsm_solution)(block_dim, stream, score, x, offsets,
+  mean, rstd, logsumexp, workspace, tiling)`. `block_dim` cannot exceed the
+  number of AI Cores (40), and the harness measures *kernel* time only, so
+  host-side work is free unless it is inside the timed region (it is not).
+
+### COMPLIANCE RULES — a source scanner rejects these before anything is measured
+The judge scans every `.c/.cpp/.h` under `solution/` and rejects:
+1. **High-level operator APIs**: `aclnn*`, `atb::*`, `torch_npu`, `mindspore`,
+   and `AscendC::SoftMax*`, `AscendC::Softmax*`, `AscendC::LayerNorm*`,
+   `AscendC::RmsNorm*`, `AscendC::LogSumExp*`. Keep computing the moments with
+   the basic vector intrinsics.
+2. **Host IO / runtime calls**: `fopen, read, write, mmap, system, open, remove,
+   rename ...`, `aclrtMemcpy/Malloc/Free/Memset/CreateEvent/EventElapsedTime`,
+   and `std::iostream` in the solution sources.
+3. **Exact shape specialisation**: any conjunction of comparisons that pins `S`,
+   `N` and `D` to literals matching a real test shape (e.g.
+   `if (s == 2048 && n == 16384 && d == 64)`) is rejected as a hard-coded case.
+   Branch only on *generic* properties (e.g. `d <= kMaxD`, `count == 0`,
+   `segment < s`); never on a (S, N, D) triple.
+4. **Writing to the inputs**: `score`, `x` and `offsets` are read-only.
+5. **Output sentinels / memoisation**: do not test `mean`/`rstd`/`logsumexp`
+   (or any NaN test on them) to detect "already computed", and do not compare
+   outputs via `GetValue()` to decide control flow.
+6. Case-id strings, and string literals >= 512 characters, are rejected.
+You cannot add files: the submission layout is fixed, put everything in the
+existing files.
+
+### Diagnostic reasoning that this specific operator rewards
+- `block_dim = min(S, 40)` means every shape with `S < 40` uses
+  `S/40` of the device. Shapes with `S = 1, 4, 8` are therefore ~10x under-
+  occupied: splitting a segment's rows across cores is the dominant lever.
+- Splitting a segment requires a deterministic combine step. Two safe designs:
+  (a) *multi-phase kernel*: partials go to `workspace`, combine after
+  `AscendC::SyncAll()`; (b) *column split*: for large `D` (192, 128, 256) split
+  the D axis instead — each core owns a slice of columns and no reduction
+  across cores is needed at all, because the moments are per-column. (b) is
+  numerically *identical* to the current implementation and is the safest
+  parallelisation; it still needs `score` read once per core (cheap: N halves),
+  and it removes the per-segment scalar bottleneck only partially.
+- Short-segment shapes (`S=2048/4096`, mean length 8/32) are dominated by
+  per-segment overhead: `S` data copies, `S` reduction round trips, and
+  per-segment scalar work. Batching several short segments into one vector
+  operation (a segmented reduction over a packed tile) is the lever there.
+- `D=64/96` with `DataCopyPad` per row costs one DMA descriptor per row; moving
+  whole tiles (`kScoreTile` scores + the matching `8*D` rows) at once, as the
+  current code does, is already the right pattern — extend it, don't fragment
+  it.
+
+### REFERENCE DESIGN — the biggest available win, in *small steps*
+For `S < 40` the device is mostly idle (`block_dim = min(S, 40)`), which is why
+the `S=1/4/8` performance shapes are the most valuable thing to fix. The safe
+way to exploit that is a **column split**, and it needs no cross-core
+communication at all, because the moments are per output column:
+
+```
+// In the host: *block_dim = min(40, d) instead of min(s, 40).
+// In the kernel: keep the per-core segment loop, but let every core own the
+// column slice [col_begin, col_end) of EVERY segment:
+//   core = block_, ncores = blocks_
+//   columns_per_core = (d + ncores - 1) / ncores
+//   col_begin = core * columns_per_core;  col_end = min(d, col_begin + columns_per_core)
+//   width = col_end - col_begin                      (may be 0 for high cores)
+// The per-core accumulators shrink to `width` floats each
+// (mean/m2/temp/correction/delta buffers sized kMaxD are already over-sized).
+// The segment maximum still has to be computed over the whole segment by
+// every core (score is tiny compared to x: N halves vs N*D halves), but the
+// expensive passes over x now run on `ncores` cores instead of `s` cores.
+```
+That is one edit's worth of work and the arithmetic is **identical** to the
+current kernel (same order per column, same max subtraction, same centred
+variance), so it should keep the correctness gate green.
+
+Only if that lands should you attempt the larger design: split a segment's
+*rows* across cores, publish per-chunk `{max, Z, sum(w*x)}` partials into the
+4 MiB `workspace`, `AscendC::SyncAll()`, let one core per segment combine them
+into `mean`, then a third pass accumulates the centred second moment about that
+published mean and a fourth combines it into `rstd`/`logsumexp`. Note SyncAll
+requires *every* core to execute the same number of phases, so that design needs
+its own work-item loop rather than the per-segment grid-stride loop; keep the
+max-subtraction at both levels and never use `E[x^2] - E[x]^2`.

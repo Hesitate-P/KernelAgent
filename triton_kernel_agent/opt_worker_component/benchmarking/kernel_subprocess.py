@@ -33,6 +33,7 @@ import sys
 from pathlib import Path
 
 from timing import (
+    ensure_device_backend,
     import_module,
     load_kernel_function,
     load_problem_interface,
@@ -204,7 +205,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--warmup", type=int, default=25)
     parser.add_argument("--repeat", type=int, default=100)
     parser.add_argument("--size", type=int, default=4096, help="Problem size N")
-    parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"])
+    parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu", "npu", "xpu"])
     parser.add_argument(
         "--dtype",
         type=str,
@@ -409,16 +410,19 @@ def _prepare_kernel(
 
 
 def _save_results(results: dict[str, Any], path: Path) -> None:
-    """Save benchmark results to JSON file."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
-        json.dump(results, f, indent=2)
+    """Save benchmark results to JSON file (confined to path's own directory)."""
+    from triton_kernel_agent.safe_io import safe_join
+
+    safe_path = safe_join(path.parent, path.name)
+    safe_path.parent.mkdir(parents=True, exist_ok=True)
+    safe_path.write_text(json.dumps(results, indent=2))
     print(f"Results saved to: {path}")
 
 
 def main():
     args = _parse_args()
 
+    ensure_device_backend(args.device)  # imports torch_npu for npu targets
     device = torch.device(args.device)
     dtype = {
         "float32": torch.float32,

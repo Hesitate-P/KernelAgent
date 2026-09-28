@@ -76,6 +76,44 @@ _XPU_CUDA_HACKS = (
     "XPUDriver.is_available = classmethod(lambda cls: False)",
 )
 
+_NPU_GUIDANCE = """\
+**CRITICAL PLATFORM REQUIREMENTS FOR ASCEND NPU (torch_npu + triton-ascend):**
+- Always `import torch_npu` right after `import torch` (this registers the npu backend)
+- Default tensor allocations to device='npu' (never 'cuda'); CPU is allowed only when necessary
+- Check availability with: hasattr(torch, 'npu') and torch.npu.is_available()
+- Do NOT monkey-patch torch.cuda or torch.device; never set TRITON_BACKENDS
+- Use torch.npu.synchronize() if synchronization is needed (torch_npu mirrors the torch.cuda API)
+- Target hardware: Huawei Ascend 910B, HBM memory, tens of AI Cores per chip (not hundreds like CUDA SMs)
+- triton-ascend manages on-chip tiling/buffering automatically; standard tl.* Triton code runs as-is"""
+
+_NPU_KERNEL_GUIDANCE = """\
+## Ascend NPU-Specific Optimizations (triton-ascend)
+
+You are generating a Triton kernel for Huawei Ascend 910B via triton-ascend. Follow these guidelines:
+
+1. **Device Context**: Use 'npu' as the device instead of 'cuda' (requires `import torch_npu`)
+2. **Grid / Core Count**: Ascend 910B has only ~20-50 AI Cores per chip (vs hundreds of CUDA SMs).
+   Prefer fewer, larger program instances; avoid over-splitting work across tiny blocks.
+3. **Thread Configuration**:
+   - num_warps: typically 4 or 8 (values above 8 rarely help on Ascend)
+   - BLOCK_SIZE: prefer 64, 128, 256, or 512; start with 128-256 for most kernels
+4. **Compute Units**: `tl.dot` maps to the Cube (matrix) unit — keep matmuls inside tl.dot so they
+   hit the Cube engine; element-wise ops run on the Vector unit.
+5. **Data Types**: fp16 and bf16 are the native high-throughput types; fp32 works but is slower.
+   Accumulate matmul results in fp32 when precision matters.
+6. **Memory**: HBM bandwidth is high but on-chip buffers (UB/L1) are small; keep working sets
+   cache-friendly and prefer contiguous access patterns. Avoid excessive global-memory round trips.
+7. **Synchronization**: use torch.npu.synchronize() on the host side; do not call torch.cuda.*"""
+
+_NPU_CUDA_HACKS = (
+    "torch.cuda.is_available = lambda: True",
+    "_orig_torch_device = torch.device",
+    "_real_torch_device = torch.device",
+    "def _fake_torch_device",
+    "torch.device = _fake_torch_device",
+    'os.environ["TRITON_BACKENDS"] = "cuda"',
+)
+
 # Platform registry
 PLATFORMS: dict[str, PlatformConfig] = {
     "cuda": PlatformConfig(
@@ -91,6 +129,13 @@ PLATFORMS: dict[str, PlatformConfig] = {
         guidance_block=_XPU_GUIDANCE,
         kernel_guidance=_XPU_KERNEL_GUIDANCE,
         cuda_hacks_to_strip=_XPU_CUDA_HACKS,
+    ),
+    "npu": PlatformConfig(
+        name="npu",
+        device_string="npu",
+        guidance_block=_NPU_GUIDANCE,
+        kernel_guidance=_NPU_KERNEL_GUIDANCE,
+        cuda_hacks_to_strip=_NPU_CUDA_HACKS,
     ),
 }
 

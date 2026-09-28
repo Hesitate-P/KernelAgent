@@ -254,6 +254,10 @@ class OptimizationWorker:
             gpu_name=self.gpu_name,
             roofline_config=self.roofline_config,
             num_bottlenecks=self.num_bottlenecks_to_request,
+            # Identity, for platforms whose components keep per-worker state
+            # (e.g. Ascend C scratch build directories).
+            worker_id=self.worker_id,
+            workdir=self.workdir,
         )
         for k, v in resolved.items():
             if k not in self._platform:
@@ -272,19 +276,29 @@ class OptimizationWorker:
             template_overrides=self.templates_config,
         )
 
-        # Benchmarking
-        from triton_kernel_agent.opt_worker_component.benchmarking.benchmark import (
-            Benchmark,
-        )
+        # Benchmarking.  Platforms whose "kernel" is not a single Triton/Python
+        # file (e.g. the ``ascend_c`` multi-file source bundle) can supply their
+        # own orchestrator-facing benchmarker through the registry; it only has
+        # to honour the ``Benchmark`` duck type (``benchmark_kernel(file,
+        # problem) -> {"time_ms": float, ...}``).  The Triton ``Benchmark``
+        # import is deliberately lazy: it pulls in ``torch``/``torch_npu``,
+        # which the Ascend C path must never need.
+        if "worker_benchmarker" in self._platform:
+            self.benchmarker = self._platform["worker_benchmarker"]
+        else:
+            from triton_kernel_agent.opt_worker_component.benchmarking.benchmark import (
+                Benchmark,
+            )
 
-        self.benchmarker = Benchmark(
-            logger=self.logger,
-            artifacts_dir=self.artifact_dir,
-            benchmark_lock=self.benchmark_lock,
-            worker_id=self.worker_id,
-            warmup=self.benchmark_warmup,
-            repeat=self.benchmark_repeat,
-        )
+            self.benchmarker = Benchmark(
+                logger=self.logger,
+                artifacts_dir=self.artifact_dir,
+                benchmark_lock=self.benchmark_lock,
+                worker_id=self.worker_id,
+                warmup=self.benchmark_warmup,
+                repeat=self.benchmark_repeat,
+                device=platform_config.device_string,
+            )
 
         # Profiler
         if "profiler" in self._platform:
@@ -319,17 +333,24 @@ class OptimizationWorker:
                 num_bottlenecks=self.num_bottlenecks_to_request,
             )
 
-        # Verification worker (for correctness checks)
+        # Verification worker (for correctness checks).  Same seam story as the
+        # benchmarker: a platform that verifies through an external harness
+        # (compile + an official test suite) supplies its own object that
+        # honours the ``VerificationWorker`` duck type (``_call_llm``,
+        # ``_extract_code_from_response``, ``verify_with_refinement``).
         from triton_kernel_agent.worker import VerificationWorker
 
-        self.verification_worker = VerificationWorker(
-            worker_id=self.worker_id,
-            workdir=self.workdir,
-            log_dir=self.log_dir,
-            openai_model=self.openai_model,
-            high_reasoning_effort=self.high_reasoning_effort,
-            target_platform=self.target_platform,
-        )
+        if "verification_worker" in self._platform:
+            self.verification_worker = self._platform["verification_worker"]
+        else:
+            self.verification_worker = VerificationWorker(
+                worker_id=self.worker_id,
+                workdir=self.workdir,
+                log_dir=self.log_dir,
+                openai_model=self.openai_model,
+                high_reasoning_effort=self.high_reasoning_effort,
+                target_platform=self.target_platform,
+            )
 
         # Roofline analyzer
         if "roofline_analyzer" in self._platform:

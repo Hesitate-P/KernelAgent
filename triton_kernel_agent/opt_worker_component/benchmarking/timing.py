@@ -168,7 +168,7 @@ def prepare_pytorch_model(
         init_inputs = [init_inputs]
 
     model = Model(*init_inputs) if init_inputs else Model()
-    model = model.cuda()
+    model = model.to(device)
     has_parameters = any(p.numel() > 0 for p in model.parameters())
 
     inputs = get_inputs()
@@ -186,9 +186,9 @@ def prepare_pytorch_model(
             model = model.to(target_dtype)
         inputs = [
             (
-                inp.cuda().to(target_dtype)
+                inp.to(device).to(target_dtype)
                 if isinstance(inp, torch.Tensor) and inp.is_floating_point()
-                else inp.cuda()
+                else inp.to(device)
                 if isinstance(inp, torch.Tensor)
                 else inp
             )
@@ -202,10 +202,10 @@ def prepare_pytorch_model(
             if isinstance(inp, torch.Tensor):
                 if i == 0 and inp.is_floating_point():
                     # First input (predictions) - convert to float32 for compatibility
-                    processed_inputs.append(inp.cuda().to(torch.float32))
+                    processed_inputs.append(inp.to(device).to(torch.float32))
                 else:
-                    # Other inputs (like targets) - just move to CUDA, preserve dtype
-                    processed_inputs.append(inp.cuda())
+                    # Other inputs (like targets) - just move to device, preserve dtype
+                    processed_inputs.append(inp.to(device))
             else:
                 processed_inputs.append(inp)
         inputs = processed_inputs
@@ -239,6 +239,37 @@ def load_kernel_function(kernel_file: Path) -> Callable:
 # =============================================================================
 # Timing Utilities
 # =============================================================================
+
+
+def ensure_device_backend(device: torch.device | str | None) -> None:
+    """Import the backend extension required by the target device (e.g. torch_npu)."""
+    if device is not None and str(device).startswith("npu"):
+        import torch_npu  # noqa: F401  (registers the Ascend npu backend)
+
+
+def get_device_api(device: torch.device | str | None):
+    """Return the torch device module mirroring torch.cuda for the target device.
+
+    torch_npu / Intel XPU expose API-compatible modules (Event, synchronize,
+    current_device, device, get_device_name, empty_cache).
+    """
+    ensure_device_backend(device)
+    if device is not None:
+        dev = str(device)
+        if dev.startswith("npu"):
+            npu = getattr(torch, "npu", None)
+            if npu is not None:
+                return npu
+        elif dev.startswith("xpu"):
+            xpu = getattr(torch, "xpu", None)
+            if xpu is not None:
+                return xpu
+    return torch.cuda
+
+
+def device_sync(device: torch.device | str | None = None) -> None:
+    """Synchronize the target device (works for cuda/npu/xpu)."""
+    get_device_api(device).synchronize()
 
 
 def clear_l2_cache(device: torch.device | str = "cuda") -> None:
@@ -288,20 +319,22 @@ def time_with_cuda_events(
     Returns:
         List of elapsed times in milliseconds (length = num_trials)
     """
+    dev_api = get_device_api(device)
     if device is None:
-        device = torch.cuda.current_device()
+        device = dev_api.current_device()
 
-    with torch.cuda.device(device):
+    with dev_api.device(device):
         # Warmup
         for _ in range(num_warmup):
             kernel_fn(*args)
-            torch.cuda.synchronize(device=device)
+            dev_api.synchronize(device=device)
 
-        torch.cuda.empty_cache()
+        if hasattr(dev_api, "empty_cache"):
+            dev_api.empty_cache()
 
         if verbose:
             print(
-                f"[Timing] Device: {torch.cuda.get_device_name(device)}, "
+                f"[Timing] Device: {dev_api.get_device_name(device)}, "
                 f"warmup={num_warmup}, trials={num_trials}"
             )
 
@@ -309,10 +342,10 @@ def time_with_cuda_events(
 
         # Timing trials
         for trial in range(num_trials + discard_first):
-            torch.cuda.synchronize(device=device)
+            dev_api.synchronize(device=device)
 
-            start_event = torch.cuda.Event(enable_timing=True)
-            end_event = torch.cuda.Event(enable_timing=True)
+            start_event = dev_api.Event(enable_timing=True)
+            end_event = dev_api.Event(enable_timing=True)
 
             if clear_cache:
                 clear_l2_cache(device=device)
@@ -321,7 +354,7 @@ def time_with_cuda_events(
             kernel_fn(*args)
             end_event.record()
 
-            torch.cuda.synchronize(device=device)
+            dev_api.synchronize(device=device)
             elapsed_time_ms = start_event.elapsed_time(end_event)
 
             if trial >= discard_first:
@@ -395,15 +428,16 @@ def time_with_triton_do_bench(
     Returns:
         List of all trial times in milliseconds
     """
+    dev_api = get_device_api(device)
     if device is None:
-        device = torch.cuda.current_device()
+        device = dev_api.current_device()
 
     import triton.testing as triton_testing
 
-    with torch.cuda.device(device):
+    with dev_api.device(device):
         if verbose:
             print(
-                f"[Timing] Using triton.do_bench on {torch.cuda.get_device_name(device)}"
+                f"[Timing] Using triton.do_bench on {dev_api.get_device_name(device)}"
             )
 
         def wrapped_fn():
@@ -453,7 +487,7 @@ def compute_timing_stats(
     }
 
     if device is not None:
-        stats["hardware"] = torch.cuda.get_device_name(device=device)
+        stats["hardware"] = get_device_api(device).get_device_name(device=device)
         stats["device"] = str(device)
 
     return stats

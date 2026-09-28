@@ -16,6 +16,8 @@
 
 import json
 import logging
+
+from triton_kernel_agent.safe_io import safe_join
 import subprocess
 import time
 from dataclasses import asdict, dataclass
@@ -326,11 +328,10 @@ class KernelProfiler:
         Args:
             results: ProfilerResults to save
         """
-        metrics_file = (
-            self.logs_dir / f"round{results.metadata.round_num:03d}_ncu_metrics.json"
+        metrics_file = safe_join(
+            self.logs_dir, f"round{results.metadata.round_num:03d}_ncu_metrics.json"
         )
 
-        with open(metrics_file, "w") as f:
-            f.write(results.to_json())
+        metrics_file.write_text(results.to_json())
 
         self.logger.debug(f"Saved metrics with metadata: {metrics_file}")

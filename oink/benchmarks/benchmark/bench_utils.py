@@ -22,6 +22,7 @@ import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import torch
@@ -212,8 +213,11 @@ def write_json(
         "meta": {**asdict(meta), **(extra or {})},
         "rows": list(rows),
     }
-    with open(path, "w") as f:
-        json.dump(payload, f, indent=2)
+    if os.path.basename(os.path.normpath(str(path))) in ("", ".", ".."):
+        raise ValueError(f"refusing to write to unsafe path: {path!r}")
+    out_path = os.path.abspath(str(path))
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    Path(out_path).write_text(json.dumps(payload, indent=2))
 
 
 def iter_row_blocks(M: int, block_rows: int) -> Iterable[Tuple[int, int]]:

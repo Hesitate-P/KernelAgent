@@ -1,0 +1,557 @@
+{
+  "schema_version": "mimosa-task-review/v2",
+  "run_id": "20260920T131903510Z-21786-d9324b8ddfaf",
+  "run_status": "inconclusive",
+  "errors": [
+    {
+      "stage": "baseline",
+      "target": ".",
+      "reason": "baseline_partial: baseline capture had enumeration or snapshot errors"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/deepseek_provider.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "utils/providers/available_models.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "Fuser/runner.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_worker_component/benchmarking/benchmark.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_worker_component/benchmarking/timing.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/platform/nvidia.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/platform/ascend.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    },
+    {
+      "stage": "scan",
+      "target": "triton_kernel_agent/opt_manager.py",
+      "reason": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+    }
+  ],
+  "coverage": {
+    "schema_version": "mimosa-hook-coverage/v1",
+    "status": "partial",
+    "scope": "hook_observed_diff",
+    "baseline": {
+      "complete": false,
+      "captured_files": 9,
+      "candidate_limit": 5000,
+      "truncated": false,
+      "enumeration_error_count": 0,
+      "snapshot_error_count": 2,
+      "compensated_target_count": 9
+    },
+    "change_tracking": {
+      "touched_observed": 9,
+      "touched_retained": 9,
+      "truncated": false,
+      "bash_mutation": true,
+      "bash_discovered": 9,
+      "bash_discovery_limit": 80,
+      "bash_discovery_truncated": false
+    },
+    "candidates": {
+      "eligible_files": 9,
+      "selected_files": 9,
+      "limit": 20,
+      "truncated": false
+    },
+    "scanning": {
+      "required_files": 9,
+      "scanned_files": 0,
+      "skipped_files": 0,
+      "failed_files": 9,
+      "project_checks_required": 0,
+      "project_checks_completed": 0
+    },
+    "notification": {
+      "eligible_findings": 0,
+      "detailed_findings": 0,
+      "detail_limit": 3,
+      "truncated": false
+    },
+    "reason_counts": {
+      "baseline_partial": 1,
+      "scanner_failed": 9,
+      "project_check_failed": 10
+    },
+    "reasons": [
+      {
+        "code": "baseline_partial",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/deepseek_provider.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "utils/providers/available_models.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "Fuser/runner.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/benchmarking/benchmark.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/benchmarking/timing.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/nvidia.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "scanner_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_manager.py",
+        "detail": "spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "baseline",
+        "target": ".",
+        "detail": "baseline_partial: baseline capture had enumeration or snapshot errors",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/deepseek_provider.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "utils/providers/available_models.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "Fuser/runner.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/benchmarking/benchmark.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/benchmarking/timing.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/nvidia.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/platform/ascend.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      },
+      {
+        "code": "project_check_failed",
+        "stage": "scan",
+        "target": "triton_kernel_agent/opt_manager.py",
+        "detail": "scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+        "affects_completion": true
+      }
+    ],
+    "reasons_truncated": false
+  },
+  "generated_at": "2026-09-20T13:19:03.510Z",
+  "session_id": "sess_72eb6273-2c50-4e37-89bc-f380af5a578f",
+  "target": ".",
+  "revision": "e0647170da36ef9b059ac0bd3d60103aa4ed378b",
+  "rules_version": "unavailable",
+  "diff_hash": "75382934ba53587921f12a4ce791c04b32ae613e79f28c712a21d84767d1f4a5",
+  "diff": {
+    "algorithm": "sha256",
+    "changed_file_count": 9,
+    "changed_files": [
+      {
+        "file": "Fuser/runner.py",
+        "ranges": [
+          {
+            "start": 94,
+            "end": 104
+          }
+        ],
+        "before_hash": "e41849e9a636564da13a3300c6724b85794dbe9c66d339e43752ae101f0b2cba",
+        "after_hash": "0da1d6f883b7c8620aae2bbddc159134e318003434fefc97b7a4bdb7438021cb"
+      },
+      {
+        "file": "triton_kernel_agent/opt_manager.py",
+        "ranges": [
+          {
+            "start": 103,
+            "end": 130
+          }
+        ],
+        "before_hash": "cbc6e3148bf48585910cf8ead5fc08a0b83d525df7acdaa0219db4605189e6bf",
+        "after_hash": "b567b125ec7591b723288bb6382875af698c8afff3dd18a1cbef97ae23552ad7"
+      },
+      {
+        "file": "triton_kernel_agent/opt_worker_component/benchmarking/benchmark.py",
+        "ranges": [
+          {
+            "start": 40,
+            "end": 40
+          },
+          {
+            "start": 96,
+            "end": 96
+          },
+          {
+            "start": 108,
+            "end": 108
+          },
+          {
+            "start": 116,
+            "end": 116
+          },
+          {
+            "start": 157,
+            "end": 158
+          },
+          {
+            "start": 237,
+            "end": 237
+          },
+          {
+            "start": 257,
+            "end": 257
+          },
+          {
+            "start": 296,
+            "end": 296
+          },
+          {
+            "start": 305,
+            "end": 305
+          },
+          {
+            "start": 323,
+            "end": 323
+          }
+        ],
+        "before_hash": "dd6abaa350c97bd864f6e2c6c62e24ac1aa652ad7e6d67890d8b95f9f8ef61ed",
+        "after_hash": "ce2ca999c6b7184109073e4aec3c0fb6b8ca5bd071ed27e8c4ee5f63bd72b0a2"
+      },
+      {
+        "file": "triton_kernel_agent/opt_worker_component/benchmarking/timing.py",
+        "ranges": [
+          {
+            "start": 171,
+            "end": 171
+          },
+          {
+            "start": 189,
+            "end": 189
+          },
+          {
+            "start": 191,
+            "end": 191
+          },
+          {
+            "start": 205,
+            "end": 205
+          },
+          {
+            "start": 207,
+            "end": 208
+          },
+          {
+            "start": 244,
+            "end": 274
+          },
+          {
+            "start": 322,
+            "end": 322
+          },
+          {
+            "start": 324,
+            "end": 324
+          },
+          {
+            "start": 326,
+            "end": 326
+          },
+          {
+            "start": 330,
+            "end": 330
+          },
+          {
+            "start": 332,
+            "end": 333
+          },
+          {
+            "start": 337,
+            "end": 337
+          },
+          {
+            "start": 345,
+            "end": 345
+          },
+          {
+            "start": 347,
+            "end": 348
+          },
+          {
+            "start": 357,
+            "end": 357
+          },
+          {
+            "start": 431,
+            "end": 431
+          },
+          {
+            "start": 433,
+            "end": 433
+          },
+          {
+            "start": 437,
+            "end": 437
+          },
+          {
+            "start": 440,
+            "end": 440
+          },
+          {
+            "start": 490,
+            "end": 490
+          }
+        ],
+        "before_hash": "99d0eda403d98fe493dfad4cb1ad1fa3c149714a0d801160c5e53740f325b1e1",
+        "after_hash": "696111a402b6d99f01d0f537d3335e04350ed3c7ebcbc08f370debb4a22f029c"
+      },
+      {
+        "file": "triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py",
+        "ranges": [
+          {
+            "start": 790,
+            "end": 797
+          },
+          {
+            "start": 799,
+            "end": 806
+          }
+        ],
+        "before_hash": "ca53a2f360bb5f4f07e5966b9c02cc6d15a122fc9ba3c6ec07fac9f57050457c",
+        "after_hash": "3c871e39cb82806b3de8247673693d449953c925638f59c13a5386908392e521"
+      },
+      {
+        "file": "triton_kernel_agent/platform/ascend.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 148
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "08846ac5ed56be4bc4c1a0e1e2708ccf98b44ff5b74d4b6a77fdd53b46fb7237"
+      },
+      {
+        "file": "triton_kernel_agent/platform/nvidia.py",
+        "ranges": [
+          {
+            "start": 52,
+            "end": 52
+          },
+          {
+            "start": 55,
+            "end": 55
+          },
+          {
+            "start": 74,
+            "end": 74
+          },
+          {
+            "start": 109,
+            "end": 109
+          },
+          {
+            "start": 116,
+            "end": 116
+          },
+          {
+            "start": 122,
+            "end": 122
+          },
+          {
+            "start": 133,
+            "end": 133
+          },
+          {
+            "start": 380,
+            "end": 396
+          }
+        ],
+        "before_hash": "ff35215c3307a0f969eabece16feb9d1943b7dda17afaa6b530f027758ce1529",
+        "after_hash": "dc4b56b52b4bea23bdc60e25c074f4ec969f2292ebb51f66f3f9412fe64d0780"
+      },
+      {
+        "file": "utils/providers/available_models.py",
+        "ranges": [
+          {
+            "start": 21,
+            "end": 21
+          },
+          {
+            "start": 31,
+            "end": 41
+          }
+        ],
+        "before_hash": "c36104a1cff4a015997d1d95a8d6b17c6e6038a639cb012187f8218063dcfbc7",
+        "after_hash": "6db3f86db4b238ad488d1271ee6798697ee0b0ced93c8387013450c90c67a803"
+      },
+      {
+        "file": "utils/providers/deepseek_provider.py",
+        "ranges": [
+          {
+            "start": 1,
+            "end": 53
+          }
+        ],
+        "before_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after_hash": "ebb6b379e7661e9d5f32c6b1f399f635d6021347352f896fd82f209158d78346"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-09-20T13:19:01.241Z",
+    "completed_at": "2026-09-20T13:19:03.510Z",
+    "duration_ms": 2269,
+    "measurement": "hook_wall_clock"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "model_calls": 0,
+    "measurement": "known-zero"
+  },
+  "telemetry": {
+    "schemaVersion": "mimosa-gate-telemetry/v1",
+    "profile": "gate",
+    "operation": "Stop",
+    "outcome": "partial/INCONCLUSIVE",
+    "latencyMs": 2269,
+    "peakMemoryBytes": 112082944,
+    "memoryMeasurement": "max-observed-process-rss",
+    "scannedFiles": 0,
+    "cache": {
+      "hits": 0,
+      "misses": 0,
+      "measurement": "not-applicable"
+    },
+    "denyCount": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "total": 0,
+      "modelCalls": 0,
+      "measurement": "known-zero"
+    }
+  },
+  "finding_count": 0,
+  "rewake_finding_count": 0,
+  "evidence_boundary": {
+    "scan": "candidate",
+    "static_fix_verification": "observed_static_only",
+    "runtime_verification": "not_performed"
+  },
+  "finding_events": [],
+  "findings": [],
+  "artifacts": {
+    "immutable_report": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f-20260920T131903510Z-21786-d9324b8ddfaf.json",
+    "latest_report": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f.json",
+    "history_summary": ".mimosa/history/run-20260920T131903510Z-21786-d9324b8ddfaf.json"
+  }
+}

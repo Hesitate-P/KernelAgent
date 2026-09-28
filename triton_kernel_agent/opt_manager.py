@@ -100,6 +100,34 @@ def _detect_gpus() -> list[int]:
                 return ids
     except Exception:
         pass
+
+    # Ascend NPU: honour ASCEND_RT_VISIBLE_DEVICES, then probe npu-smi.
+    arvd = os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
+    if arvd:
+        try:
+            ids = [int(x.strip()) for x in arvd.split(",") if x.strip()]
+            if ids:
+                return ids
+        except ValueError:
+            pass
+    try:
+        out = subprocess.run(
+            ["npu-smi", "info", "-l"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if out.returncode == 0:
+            ids = [
+                int(line.strip().split()[-1])
+                for line in out.stdout.splitlines()
+                if line.strip().startswith("Total Count")
+            ]
+            count = ids[0] if ids else 0
+            if count > 0:
+                return list(range(count))
+    except Exception:
+        pass
     return [0]
 
 
@@ -289,6 +317,7 @@ class OptimizationManager:
             worker_kwargs=self.worker_kwargs,
             gpu_ids=self.gpu_ids,
             gpu_locks=self.gpu_locks,
+            target_platform=self.worker_kwargs.get("target_platform", "cuda"),
         )
         self.verifier = components["verifier"]
         self.benchmarker = components["benchmarker"]

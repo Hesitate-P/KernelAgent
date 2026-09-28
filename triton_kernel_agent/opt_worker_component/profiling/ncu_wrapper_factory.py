@@ -18,14 +18,15 @@ import logging
 from functools import cached_property
 from pathlib import Path
 
-from jinja2 import Template
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 
 class NCUWrapperFactory:
     """Factory for creating NCU wrapper scripts for profiling Triton kernels."""
 
     # Template file path (relative to this file)
-    WRAPPER_TEMPLATE = Path(__file__).parent / "ncu_wrapper_template.j2"
+    WRAPPER_TEMPLATE_DIR = Path(__file__).parent
+    WRAPPER_TEMPLATE_NAME = "ncu_wrapper_template.j2"
 
     def __init__(self, logger: logging.Logger):
         """
@@ -37,16 +38,27 @@ class NCUWrapperFactory:
         self.logger = logger
 
     @cached_property
-    def template(self) -> Template:
+    def template(self) -> Environment:
         """
-        Jinja2 template for wrapper script generation.
+        Sandboxed Jinja2 environment for wrapper script generation.
+
+        The template is loaded strictly by file name from the packaging
+        directory (no arbitrary template sources), with autoescape on and
+        undefined variables rejected.
 
         Raises:
             FileNotFoundError: If template file doesn't exist
         """
-        if not self.WRAPPER_TEMPLATE.exists():
-            raise FileNotFoundError(f"Template not found: {self.WRAPPER_TEMPLATE}")
-        return Template(self.WRAPPER_TEMPLATE.read_text())
+        template_path = self.WRAPPER_TEMPLATE_DIR / self.WRAPPER_TEMPLATE_NAME
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template not found: {template_path}")
+        env = Environment(
+            loader=FileSystemLoader(str(self.WRAPPER_TEMPLATE_DIR)),
+            autoescape=True,
+            undefined=StrictUndefined,
+            keep_trailing_newline=True,
+        )
+        return env.get_template(self.WRAPPER_TEMPLATE_NAME)
 
     def create_ncu_wrapper(
         self,

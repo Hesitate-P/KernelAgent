@@ -159,7 +159,8 @@ def matmul_persistent(a, b):
     # Check constraints.
     assert a.shape[1] == b.shape[0], "Incompatible dimensions"
     assert a.dtype == b.dtype, "Incompatible dtypes"
-    NUM_SMS = torch.cuda.get_device_properties("cuda").multi_processor_count
+    # Persistent-kernel grid sizing is CUDA-specific; on other backends use a fixed grid
+    NUM_SMS = torch.cuda.get_device_properties("cuda").multi_processor_count if torch.cuda.is_available() else 32
     M, K = a.shape
     K, N = b.shape
     dtype = a.dtype

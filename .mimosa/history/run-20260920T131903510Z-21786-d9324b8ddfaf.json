@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "mimosa-finding-history/v1",
+  "runId": "20260920T131903510Z-21786-d9324b8ddfaf",
+  "runStatus": "inconclusive",
+  "errors": [
+    "baseline:.: baseline_partial: baseline capture had enumeration or snapshot errors",
+    "scan:utils/providers/deepseek_provider.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:utils/providers/available_models.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:Fuser/runner.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_worker_component/benchmarking/benchmark.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_worker_component/benchmarking/timing.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/platform/nvidia.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/platform/ascend.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_worker_component/orchestrator/optimization_orchestrator.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT",
+    "scan:triton_kernel_agent/opt_manager.py: scanner_failed: spawnSync /usr/local/bin/node ETIMEDOUT"
+  ],
+  "target": ".",
+  "revision": "e0647170da36ef9b059ac0bd3d60103aa4ed378b",
+  "diffHash": "75382934ba53587921f12a4ce791c04b32ae613e79f28c712a21d84767d1f4a5",
+  "rulesVersion": "unavailable",
+  "recordedAt": "2026-09-20T13:19:03.510Z",
+  "timing": {
+    "startedAt": "2026-09-20T13:19:01.241Z",
+    "completedAt": "2026-09-20T13:19:03.510Z",
+    "durationMs": 2269
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0,
+    "total": 0,
+    "modelCalls": 0,
+    "measurement": "known-zero"
+  },
+  "findings": {
+    "total": 0,
+    "bySeverity": {},
+    "byStatus": {}
+  },
+  "coverage": {
+    "status": "partial",
+    "reasonCounts": {
+      "baseline_partial": 1,
+      "scanner_failed": 9,
+      "project_check_failed": 10
+    }
+  },
+  "evidenceBoundary": "static_only",
+  "immutableReport": ".mimosa/reports/task-review-sess_72eb6273-2c50-4e37-89bc-f380af5a578f-20260920T131903510Z-21786-d9324b8ddfaf.json"
+}

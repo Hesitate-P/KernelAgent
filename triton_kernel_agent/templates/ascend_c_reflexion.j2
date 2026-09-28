@@ -1,0 +1,63 @@
+{#
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+#}
+A candidate Ascend C kernel was just written and evaluated by the official
+public harness. Write a short, honest self-reflection for the next round.
+
+## Attempt
+- Round: {{ attempt.round_num }}
+- Direction attempted: {{ attempt.bottleneck_category }}
+- Root cause it targeted: {{ attempt.root_cause }}
+- Change applied: {{ attempt.recommended_fix }}
+- Passed the build + correctness gate: {{ "yes" if attempt.passed_verification else "NO" }}
+- Official measured latency (weighted geometric mean of the 7 public perf cases,
+  milliseconds; the baseline implementation is the reference, so lower is
+  faster and the ratio baseline/candidate IS the contest score `G_ref_public`):
+  {{ "%.4f"|format(attempt.time_before_ms) }} ms -> {{ "%.4f"|format(attempt.time_after_ms) }} ms
+  ({{ "%+.1f"|format(attempt.improvement_pct) }}%)
+{% if not attempt.passed_verification and attempt.error_message %}
+## Failure output (tail)
+```
+{{ attempt.error_message[:1500] }}
+```
+{% endif %}
+
+## What to reason about
+1. If it failed the gate: was it a compile error, a correctness failure, or a
+   timeout? Quote the exact symptom and name the coding mistake that caused it.
+   A precision failure means the reduction/accumulation order changed in a way
+   the FP64 oracle rejects.
+2. If it passed but got slower: which public shape regressed? Per-segment
+   overhead, extra DMA round trips, lost vectorisation, and scalar
+   `GetValue()` calls inside row loops are the usual culprits.
+3. If it got faster: name the exact mechanism (core occupancy, fewer DMAs,
+   fewer transcendentals, less scalar work) so it can be pushed further.
+4. What is the single next change with the best risk/benefit ratio?
+
+Respond with a JSON object only:
+```json
+{
+    "was_diagnosis_correct": true or false,
+    "was_fix_effective": true or false,
+    "expected_outcome": "...",
+    "actual_outcome": "...",
+    "reasoning": "why it worked or failed, citing the numbers above",
+    "lessons": ["..."],
+    "avoid_patterns": ["..."],
+    "try_patterns": ["..."]
+}
+```
+
+Generate the JSON response:

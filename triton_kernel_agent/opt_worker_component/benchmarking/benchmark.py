@@ -37,6 +37,7 @@ from triton_kernel_agent.opt_worker_component.searching.ptx_fingerprint import (
 
 from triton_kernel_agent.opt_worker_component.benchmarking.timing import (
     compute_timing_stats,
+    device_sync,
     prepare_pytorch_model,
     time_with_cuda_events,
     time_with_triton_do_bench,
@@ -92,6 +93,7 @@ class Benchmark:
         warmup: int = 25,
         repeat: int = 100,
         timing_method: str = "cuda_event",
+        device: str = "cuda",
     ):
         """Initialize the benchmark.
 
@@ -103,6 +105,7 @@ class Benchmark:
             warmup: Number of warmup iterations (or warmup time in ms for do_bench)
             repeat: Number of repeat iterations (or rep time in ms for do_bench)
             timing_method: Timing method ("cuda_event", "do_bench", "host_time")
+            device: Target device string ("cuda", "npu", "xpu", ...)
         """
         self.logger = logger
         self.artifacts_dir = artifacts_dir
@@ -110,6 +113,7 @@ class Benchmark:
         self.warmup = warmup
         self.repeat = repeat
         self.timing_method = timing_method
+        self.device = device
 
     def benchmark_kernel(
         self,
@@ -150,6 +154,8 @@ class Benchmark:
                     str(problem_file),
                     "--kernel",
                     str(kernel_file),
+                    "--device",
+                    self.device,
                     "--warmup",
                     str(self.warmup),
                     "--repeat",
@@ -228,7 +234,7 @@ class Benchmark:
             with self.lock_manager:
                 model, inputs = prepare_pytorch_model(
                     problem_file=problem_file,
-                    device="cuda",
+                    device=self.device,
                     dtype=dtype,
                 )
 
@@ -248,6 +254,7 @@ class Benchmark:
                         num_trials=self.repeat,
                         clear_cache=True,
                         verbose=False,
+                        device=self.device,
                     )
 
                 stats = compute_timing_stats(times)
@@ -286,7 +293,7 @@ class Benchmark:
             with self.lock_manager:
                 model, inputs = prepare_pytorch_model(
                     problem_file=problem_file,
-                    device="cuda",
+                    device=self.device,
                     dtype=dtype,
                 )
 
@@ -295,7 +302,7 @@ class Benchmark:
                 # Extended warmup: 3 forward calls to trigger compilation
                 for _ in range(3):
                     model(*inputs)
-                torch.cuda.synchronize()
+                device_sync(self.device)
 
                 if self.timing_method == "do_bench":
                     times = time_with_triton_do_bench(
@@ -313,6 +320,7 @@ class Benchmark:
                         num_trials=self.repeat,
                         clear_cache=True,
                         verbose=False,
+                        device=self.device,
                     )
 
                 stats = compute_timing_stats(times)
